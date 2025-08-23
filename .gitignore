@@ -8,9 +8,9 @@ output/*
 
 # --- Virtual environment ---
 venv/
+.venv/
 .env/
 .envrc/
-.venv/
 
 # --- Python cache & compiled files ---
 __pycache__/
@@ -19,7 +19,7 @@ __pycache__/
 
 # --- Jupyter ---
 .ipynb_checkpoints/
-*.ipynb~  # temporary notebook saves
+*.ipynb~
 
 # --- Logs ---
 *.log
@@ -35,4 +35,3 @@ __pycache__/
 # --- OS-specific ---
 .DS_Store
 Thumbs.db
-
