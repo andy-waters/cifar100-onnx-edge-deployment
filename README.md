@@ -2,8 +2,6 @@
 
 This project demonstrates end-to-end machine learning workflows on the CIFAR-100 dataset using ResNet architectures. The implementation covers **training, evaluation, model export, and preparation for edge deployment** (e.g., NVIDIA Jetson devices).  
 
-While the initial scope was to implement **knowledge distillation**, this part is currently stubbed out for future development. The completed components already demonstrate strong capabilities in **ML model development, ONNX conversion, and edge-device deployment pipelines**.
-
 ---
 
 ## ✨ Features
