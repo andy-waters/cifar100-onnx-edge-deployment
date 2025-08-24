@@ -1,0 +1,45 @@
+# CUDA 12.1 + cuDNN8 runtime (Ubuntu 22.04)
+FROM nvidia/cuda:12.1.1-cudnn8-runtime-ubuntu22.04
+
+ENV DEBIAN_FRONTEND=noninteractive
+ENV PYTHONDONTWRITEBYTECODE=1 \
+    PYTHONUNBUFFERED=1 \
+    PIP_NO_CACHE_DIR=1 \
+    PIP_DISABLE_PIP_VERSION_CHECK=1 \
+    MPLBACKEND=Agg
+
+# Add Python 3.12 from deadsnakes, plus build tools
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    software-properties-common ca-certificates curl git build-essential \
+ && add-apt-repository ppa:deadsnakes/ppa -y \
+ && apt-get update && apt-get install -y --no-install-recommends \
+    python3.12 python3.12-venv python3.12-distutils python3-pip \
+ && rm -rf /var/lib/apt/lists/*
+
+# Make `python` -> python3.12
+RUN update-alternatives --install /usr/bin/python python /usr/bin/python3.12 1
+
+# Upgrade pip for 3.12
+RUN python -m pip install --upgrade pip
+
+# Non-root user
+ARG UID=1000
+ARG GID=1000
+RUN groupadd -g $GID app && useradd -m -u $UID -g app app
+WORKDIR /app
+
+# Install CUDA-enabled PyTorch first (pin if you like)
+# These wheels target CUDA 12.1 and support Python 3.12
+RUN pip install --index-url https://download.pytorch.org/whl/cu121 \
+    torch==2.3.1 torchvision==0.18.1 torchaudio==2.3.1
+
+# Then your remaining deps (DO NOT include torch/vision/audio in requirements.txt)
+COPY requirements.txt /tmp/requirements.txt
+RUN pip install -r /tmp/requirements.txt
+
+# Copy project
+COPY . /app
+RUN chown -R app:app /app
+USER app
+
+CMD ["python", "scripts/trainer.py"]

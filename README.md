@@ -16,6 +16,7 @@ This project demonstrates end-to-end machine learning workflows on the CIFAR-100
 ## 📂 Project Structure
 ```
 ResNet.ipynb                # Jupyter notebook for experimentation
+requirements.txt            # dependencies for the project
 output/                     # Model checkpoints and exports
 scripts/                    # Core Python scripts
   ├── cifar100_data_provider.py
@@ -26,14 +27,16 @@ scripts/                    # Core Python scripts
   ├── tester.py
   └── trainer.py
 data/                       # CIFAR-100 dataset (auto-downloaded)
+Dockerfile.cpu              # CPU-only environment (Python 3.12, PyTorch)
+Dockerfile.cuda             # CUDA-enabled environment (Python 3.12, PyTorch + cu121)
 ```
 
 ---
 
-## 🚀 Getting Started
+## 🚀 Getting Started (Local Python)
 1. **Install dependencies**
    ```bash
-   pip install torch torchvision onnx pyyaml tqdm scikit-learn
+   pip install -r requirements.txt
    ```
 2. **Prepare CIFAR-100 dataset**  
    - Automatically downloaded during training if not already present.  
@@ -59,6 +62,52 @@ data/                       # CIFAR-100 dataset (auto-downloaded)
      python scripts/onnx_yaml_converter.py
      ```
    - **HEF (AI HAT)**: Work in progress, see `hef_converter.py`.
+
+---
+
+## 🐳 Running with Docker
+
+This project includes two Dockerfiles:
+
+- **Dockerfile.cpu** → For training and testing on CPU (works everywhere, slower).  
+- **Dockerfile.cuda** → For training on NVIDIA GPUs with CUDA 12.1 (requires [NVIDIA Container Toolkit](https://docs.nvidia.com/datacenter/cloud-native/container-toolkit/install-guide.html)).  
+
+### 1. Build the image
+**CPU version**:
+```bash
+docker build -t cifarproject:py312-cpu -f Dockerfile.cpu .
+```
+
+**CUDA version**:
+```bash
+docker build -t cifarproject:py312-cuda121 -f Dockerfile.cuda .
+```
+
+### 2. Run training
+Mount your code + cache so datasets and logs persist:
+
+**CPU**:
+```bash
+docker run --rm -it   -v "$PWD":/app   -v "$HOME/.cache/torch":/home/app/.cache/torch   cifarproject:py312-cpu   python scripts/trainer.py --epochs 5 --batch-size 64
+```
+
+**CUDA (GPU)**:
+```bash
+docker run --rm -it --gpus all   -v "$PWD":/app   -v "$HOME/.cache/torch":/home/app/.cache/torch   cifarproject:py312-cuda121   python scripts/trainer.py --epochs 5 --batch-size 64
+```
+
+### 3. Run evaluation
+```bash
+docker run --rm -it   -v "$PWD":/app   cifarproject:py312-cpu   python scripts/tester.py
+```
+
+### 4. Quick smoke test
+Verify PyTorch is installed and see if CUDA is available:
+```bash
+docker run --rm -it cifarproject:py312-cpu   python -c "import torch; print('Torch', torch.__version__, 'CUDA?', torch.cuda.is_available())"
+
+docker run --rm -it --gpus all cifarproject:py312-cuda121   python -c "import torch; print('Torch', torch.__version__, 'CUDA?', torch.cuda.is_available())"
+```
 
 ---
 
