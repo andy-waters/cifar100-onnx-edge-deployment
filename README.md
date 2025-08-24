@@ -88,12 +88,12 @@ Mount your code + cache so datasets and logs persist:
 
 **CPU**:
 ```bash
-docker run --rm -it   -v "$PWD":/app   -v "$HOME/.cache/torch":/home/app/.cache/torch   cifarproject:py312-cpu   python scripts/trainer.py --epochs 5 --batch-size 64
+docker run --rm -it   -v "$PWD":/app   -v "$HOME/.cache/torch":/home/app/.cache/torch   cifarproject:py312-cpu   python scripts/trainer.py
 ```
 
 **CUDA (GPU)**:
 ```bash
-docker run --rm -it --gpus all   -v "$PWD":/app   -v "$HOME/.cache/torch":/home/app/.cache/torch   cifarproject:py312-cuda121   python scripts/trainer.py --epochs 5 --batch-size 64
+docker run --rm -it --gpus all   -v "$PWD":/app   -v "$HOME/.cache/torch":/home/app/.cache/torch   cifarproject:py312-cuda121   python scripts/trainer.py
 ```
 
 ### 3. Run evaluation
